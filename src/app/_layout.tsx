@@ -41,7 +41,15 @@ export default function RootLayout() {
     );
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="add-drink" />
+      <Stack.Screen name="edit-entry" />
+      <Stack.Screen name="drink-definitions" />
+      <Stack.Screen name="drink-definition-edit" />
+    </Stack>
+  );
 }
 
 const styles = StyleSheet.create({

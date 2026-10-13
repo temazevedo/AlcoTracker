@@ -684,3 +684,12 @@ export async function resetDatabase(): Promise<void> {
   await closeDatabase();
   // The next getDatabase() call will re-run migrations
 }
+
+/**
+ * Calculate pure alcohol grams from volume and ABV.
+ * Formula: grams = volume_ml * (abv / 100) * 0.789
+ * 0.789 = density of ethanol (g/ml)
+ */
+export function calculateGrams(volume_ml: number, abv: number): number {
+  return volume_ml * (abv / 100) * 0.789;
+}
