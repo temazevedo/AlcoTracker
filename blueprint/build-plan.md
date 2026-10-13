@@ -16,7 +16,7 @@ Start with your first real slice of functionality.
 ## Your features
 
 - [X] 1. **Project setup & Native Tabs navigation** — Initialize Expo project structure, configure TypeScript, set up Expo Router with 4 native tab screens (Home, Log, Stats, Settings) as empty placeholders. Runnable app with tab navigation.
-- [ ] 2. **Database schema, migrations & seed data** — Create SQLite schema (5 tables), versioned migration runner, seed 8 default drink definitions, repository functions for CRUD operations.
+- [X] 2. **Database schema, migrations & seed data** — Create SQLite schema (5 tables), versioned migration runner, seed 8 default drink definitions, repository functions for CRUD operations.
 - [ ] 3. **BAC calculation module + Jest tests** — Pure TypeScript Widmark formula implementation with 5-min time-stepping, instant absorption model, helper functions (current BAC, peak BAC, time to zero). 100% test coverage for specified cases.
 - [ ] 4. **Add Drink, Drink Definitions & Log screen** — Drink definitions list (add/edit/archive/favorite), Add Drink flow (pick definition, set time, note, snapshot), Log screen (browse by day, daily totals, entry list with edit/delete, day notes).
 - [ ] 5. **Home screen with BAC graph & quick-add** — Real-time BAC display, current BAC + time to zero, today's BAC line graph (react-native-gifted-charts), quick-add buttons for recent drinks, "Add Drink" and "Start Tracking" actions.
