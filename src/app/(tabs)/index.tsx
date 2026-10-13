@@ -1,18 +1,65 @@
-import { StyleSheet, Text, View, TouchableOpacity, useColorScheme } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, useColorScheme, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
+import { useBAC } from "@/hooks/useBAC";
+import { getRecentDistinctDrinks } from "@/db/repository";
+import { BACGraph } from "@/components/BACGraph";
+import { QuickAddButtons } from "@/components/QuickAddButtons";
+import { useState, useEffect } from "react";
+
+// Type for recent drinks from getRecentDistinctDrinks
+interface RecentDrink {
+  name: string;
+  volume_ml: number;
+  abv: number;
+  definition_id: number | null;
+}
 
 export default function HomeScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const { currentBAC, peakBAC, timeToZeroMinutes, series, loading, error } = useBAC();
+  const [quickAddDrinks, setQuickAddDrinks] = useState<RecentDrink[]>([]);
+  const [drinksLoading, setDrinksLoading] = useState(true);
 
-  const handleAddDrink = () => {
-    router.push("/add-drink" as any);
+  useEffect(() => {
+    const loadDrinks = async () => {
+      setDrinksLoading(true);
+      const result = await getRecentDistinctDrinks(4);
+      if (result.success) {
+        setQuickAddDrinks(result.data);
+      }
+      setDrinksLoading(false);
+    };
+    loadDrinks();
+  }, []);
+
+  const formatBAC = (bac: number): string => {
+    return bac.toFixed(3);
   };
 
-  const handleStartTracking = () => {
-    router.push("/start-tracking" as any);
+  const formatTimeToZero = (minutes: number | null): string => {
+    if (minutes === null || minutes <= 0) return "—";
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) return `${hours}h ${mins}m`;
+    return `${mins}m`;
   };
+
+  if (error) {
+    return (
+      <View style={[styles.container, { backgroundColor: isDark ? "#121212" : "#F5F5F5" }]}>
+        <View style={[styles.errorCard, { backgroundColor: isDark ? "#1E1E1E" : "#FFFFFF" }]}>
+          <Text style={[styles.errorText, { color: "#D32F2F" }]}>Failed to load BAC data</Text>
+          <Text style={[styles.errorDetail, { color: isDark ? "#BDBDBD" : "#757575" }]}>{error}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  const bacDisplay = loading ? "—" : formatBAC(currentBAC);
+  const peakDisplay = peakBAC ? formatBAC(peakBAC.bac) : "—";
+  const timeToZeroDisplay = timeToZeroMinutes !== null ? formatTimeToZero(timeToZeroMinutes) : "—";
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? "#121212" : "#F5F5F5" }]}>
@@ -20,21 +67,55 @@ export default function HomeScreen() {
         <Text style={[styles.title, { color: isDark ? "#FFFFFF" : "#212121" }]}>AlcoTracker</Text>
       </View>
 
+      {/* BAC Card */}
       <View style={[styles.bacCard, { backgroundColor: isDark ? "#1E1E1E" : "#FFFFFF" }]}>
-        <Text style={[styles.bacLabel, { color: isDark ? "#BDBDBD" : "#757575" }]}>Current BAC</Text>
-        <Text style={[styles.bacValue, { color: isDark ? "#FFFFFF" : "#212121" }]}>0.000 ‰</Text>
-        <Text style={[styles.bacSubtext, { color: isDark ? "#9E9E9E" : "#9E9E9E" }]}>Time to ~0: —</Text>
+        <View style={styles.bacRow}>
+          <View style={styles.bacItem}>
+            <Text style={[styles.bacLabel, { color: isDark ? "#BDBDBD" : "#757575" }]}>Current BAC</Text>
+            <Text style={[styles.bacValue, { color: isDark ? "#FFFFFF" : "#212121" }]}>{bacDisplay} ‰</Text>
+          </View>
+          <View style={[styles.bacDivider, { backgroundColor: isDark ? "#444" : "#E0E0E0" }]} />
+          <View style={styles.bacItem}>
+            <Text style={[styles.bacLabel, { color: isDark ? "#BDBDBD" : "#757575" }]}>Peak BAC</Text>
+            <Text style={[styles.bacValue, { color: isDark ? "#FF5722" : "#FF5722" }]}>{peakDisplay} ‰</Text>
+          </View>
+          <View style={[styles.bacDivider, { backgroundColor: isDark ? "#444" : "#E0E0E0" }]} />
+          <View style={styles.bacItem}>
+            <Text style={[styles.bacLabel, { color: isDark ? "#BDBDBD" : "#757575" }]}>Time to ~0</Text>
+            <Text style={[styles.bacValue, { color: isDark ? "#4CAF50" : "#4CAF50" }]}>{timeToZeroDisplay}</Text>
+          </View>
+        </View>
       </View>
 
-      <View style={[styles.graphPlaceholder, { backgroundColor: isDark ? "#1E1E1E" : "#FFFFFF" }]}>
-        <Text style={[styles.graphText, { color: isDark ? "#9E9E9E" : "#9E9E9E" }]}>BAC Graph (Feature 5)</Text>
+      {/* BAC Graph */}
+      <View style={[styles.graphCard, { backgroundColor: isDark ? "#1E1E1E" : "#FFFFFF" }]}>
+        <BACGraph
+          series={series}
+          peakBAC={peakBAC}
+          timeToZeroMinutes={timeToZeroMinutes}
+        />
       </View>
 
+      {/* Quick Add */}
       <View style={styles.quickAddSection}>
-        <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#212121" }]}>Quick Add</Text>
-        <Text style={[styles.sectionSubtext, { color: isDark ? "#BDBDBD" : "#757575" }]}>Recent drinks will appear here</Text>
+        <View style={styles.quickAddHeader}>
+          <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#212121" }]}>Quick Add</Text>
+          {drinksLoading ? (
+            <ActivityIndicator size="small" color="#208AEF" />
+          ) : (
+            <QuickAddButtons
+              drinks={quickAddDrinks}
+              onPress={(drink) => {
+                if (drink.definition_id) {
+                  router.push({ pathname: "/add-drink", params: { preselectedDrinkId: String(drink.definition_id) } } as any);
+                }
+              }}
+            />
+          )}
+        </View>
       </View>
 
+      {/* Actions */}
       <View style={styles.actions}>
         <TouchableOpacity onPress={() => router.push("/add-drink" as any)} style={styles.primaryAction}>
           <Text style={styles.primaryActionText}>+ Add Drink</Text>
@@ -63,57 +144,58 @@ const styles = StyleSheet.create({
   },
   bacCard: {
     borderRadius: 16,
-    padding: 24,
+    padding: 20,
     marginBottom: 16,
-    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
+  bacRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  bacItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  bacDivider: {
+    width: 1,
+    height: 48,
+  },
   bacLabel: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "500",
     marginBottom: 4,
   },
   bacValue: {
-    fontSize: 48,
+    fontSize: 28,
     fontWeight: "700",
-    marginBottom: 8,
   },
-  bacSubtext: {
-    fontSize: 14,
-  },
-  graphPlaceholder: {
+  graphCard: {
     borderRadius: 16,
-    padding: 32,
     marginBottom: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 150,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-  },
-  graphText: {
-    fontSize: 16,
+    overflow: "hidden",
   },
   quickAddSection: {
     marginBottom: 24,
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: "rgba(32, 138, 239, 0.1)",
+  },
+  quickAddHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 4,
-  },
-  sectionSubtext: {
-    fontSize: 14,
   },
   actions: {
     gap: 12,
@@ -147,5 +229,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: "#208AEF",
+  },
+  errorCard: {
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  errorText: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  errorDetail: {
+    fontSize: 13,
+    textAlign: "center",
   },
 });

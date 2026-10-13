@@ -1,18 +1,32 @@
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, Keyboard, Modal } from "react-native";
 import { useState, useEffect } from "react";
-import { useRouter } from "expo-router";
-import { createEntry, getActiveSession, calculateGrams } from "@/db/repository";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { createEntry, getActiveSession, calculateGrams, getDefinitionById } from "@/db/repository";
 import { DrinkDefinitionRow } from "@/db/schema";
 import { DrinkPicker } from "@/components/DrinkPicker";
 import { DateTimePickerComponent } from "@/components/DateTimePicker";
 
 export default function AddDrinkScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ preselectedDrinkId?: string }>();
   const [selectedDrink, setSelectedDrink] = useState<DrinkDefinitionRow | null>(null);
   const [consumedAt, setConsumedAt] = useState<Date>(new Date());
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
+
+  // Load preselected drink if provided
+  useEffect(() => {
+    if (params.preselectedDrinkId) {
+      const loadDrink = async () => {
+        const result = await getDefinitionById(parseInt(params.preselectedDrinkId!, 10));
+        if (result.success && result.data) {
+          setSelectedDrink(result.data);
+        }
+      };
+      loadDrink();
+    }
+  }, [params.preselectedDrinkId]);
 
   // Load active session if any
   useEffect(() => {
