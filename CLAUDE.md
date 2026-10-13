@@ -1,0 +1,3 @@
+# AlcoTracker
+
+@AGENTS.md
