@@ -51,7 +51,7 @@ SQLite tables (local device only):
 
 | Category | Choice |
 |----------|--------|
-| **Framework** | Expo SDK 57/58 with TypeScript |
+| **Framework** | Expo SDK 58 with TypeScript |
 | **Navigation** | Expo Router with Native Tabs (`expo-router/native-tabs`) |
 | **Database** | Plain `expo-sqlite` with manual versioned migrations |
 | **State** | Zustand (profile & settings) |

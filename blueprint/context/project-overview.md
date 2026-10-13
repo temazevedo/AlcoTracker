@@ -1,6 +1,6 @@
 # AlcoTracker - Project Overview
 
-<!-- blueprint:source-hash 7a7d4a30f7e404770b95476fca692230537fa94d669114bf0f734115ed4c70b8 -->
+<!-- blueprint:source-hash 10eef960832c007dee3abb3c3bfcac0d0a7d57b051441af8245dc50e00909cfe -->
 
 > Android alcohol-tracking app for personal BAC estimation and drink logging, inspired by AlcoDroid. Fully offline, privacy-first, single-device.
 
@@ -89,7 +89,7 @@ The MVP feature set in build order:
 
 ## Tech stack
 
-- **Expo SDK 57/58 + TypeScript** — Framework and runtime
+- **Expo SDK 58 + TypeScript** — Framework and runtime
 - **Expo Router + Native Tabs (`expo-router/native-tabs`)** — File-based routing, native bottom tabs
 - **expo-sqlite** — Local SQLite database with manual versioned migrations
 - **Zustand** — Global UI state (profile, settings)
