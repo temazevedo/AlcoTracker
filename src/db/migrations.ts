@@ -161,18 +161,9 @@ export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       const sql = await readMigrationSql(migration.name);
 
       // Execute migration in a transaction
+      // execAsync supports multiple statements; no need to split
       await db.withTransactionAsync(async () => {
-        // Split by semicolon and execute each statement
-        const statements = sql
-          .split(';')
-          .map((s) => s.trim())
-          .filter((s) => s.length > 0 && !s.startsWith('--'));
-
-        for (const statement of statements) {
-          if (statement.trim()) {
-            await db.execAsync(statement);
-          }
-        }
+        await db.execAsync(sql);
 
         // Update version
         await setDbVersion(db, migration.version);
