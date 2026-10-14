@@ -1,6 +1,6 @@
 # AlcoTracker - Project Overview
 
-<!-- blueprint:source-hash 0795661025200e9384a3f65a4369b1acab55e0829504d0169a655e5f72e41194 -->
+<!-- blueprint:source-hash 80f5003bca6272f96dac0bcb074f2be80782701fe2a70e34cdf5ce0f34e87417 -->
 
 > Android alcohol-tracking app for personal BAC estimation and drink logging, inspired by AlcoDroid. Fully offline, privacy-first, single-device.
 

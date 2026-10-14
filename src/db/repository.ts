@@ -317,6 +317,32 @@ export async function getTodaysEntries(): Promise<RepositoryResult<DrinkEntryRow
   return getEntriesByDate(today);
 }
 
+/**
+ * Get entries for the last N days (for stats screen)
+ */
+export async function getEntriesForStats(
+  lookbackDays: number
+): Promise<RepositoryResult<DrinkEntryRow[]>> {
+  try {
+    const db = await getDatabase();
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate = new Date(Date.now() - (lookbackDays - 1) * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0];
+    const startUtc = `${startDate}T00:00:00.000Z`;
+    const endUtc = `${endDate}T23:59:59.999Z`;
+    const data = await db.getAllAsync<DrinkEntryRow>(
+      `SELECT * FROM ${TABLE_NAMES.DRINK_ENTRIES}
+       WHERE consumed_at >= ? AND consumed_at <= ?
+       ORDER BY consumed_at ASC`,
+      [startUtc, endUtc]
+    );
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: `Failed to get entries for stats: ${error}` };
+  }
+}
+
 export async function updateEntry(
   id: number,
   updates: Partial<Pick<DrinkEntryRow, 'name_snapshot' | 'volume_ml' | 'abv' | 'grams' | 'consumed_at' | 'note'>>
