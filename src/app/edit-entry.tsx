@@ -5,7 +5,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { getEntryById, updateEntry, deleteEntry, getActiveDefinitions, calculateGrams } from "@/db/repository";
 import { DrinkEntryRow, DrinkDefinitionRow } from "@/db/schema";
 import { DrinkPicker } from "@/components/DrinkPicker";
-import { DateTimePickerComponent } from "@/components/DateTimePicker";
+import DateTimePickerComponent from "@/components/DateTimePicker";
 
 export default function EditEntryScreen() {
   const router = useRouter();
@@ -47,7 +47,7 @@ export default function EditEntryScreen() {
       loadEntry();
       loadDefinitions();
     }
-  }, [loadEntry, loadDefinitions, params.id]); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [loadEntry, loadDefinitions, params.id]);  
 
   const handleDrinkSelect = (drink: DrinkDefinitionRow) => {
     setSelectedDrink(drink);

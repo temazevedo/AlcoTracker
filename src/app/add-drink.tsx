@@ -4,7 +4,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { createEntry, getActiveSession, calculateGrams, getDefinitionById } from "@/db/repository";
 import { DrinkDefinitionRow } from "@/db/schema";
 import { DrinkPicker } from "@/components/DrinkPicker";
-import { DateTimePickerComponent } from "@/components/DateTimePicker";
+import DateTimePickerComponent from "@/components/DateTimePicker";
 
 export default function AddDrinkScreen() {
   const router = useRouter();

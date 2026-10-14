@@ -289,6 +289,23 @@ export async function getEntriesByDateRange(
   }
 }
 
+export async function getEntriesBySession(
+  sessionId: number
+): Promise<RepositoryResult<DrinkEntryRow[]>> {
+  try {
+    const db = await getDatabase();
+    const data = await db.getAllAsync<DrinkEntryRow>(
+      `SELECT * FROM ${TABLE_NAMES.DRINK_ENTRIES}
+       WHERE session_id = ?
+       ORDER BY consumed_at ASC`,
+      [sessionId]
+    );
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: `Failed to get entries by session: ${error}` };
+  }
+}
+
 export async function getEntriesByDate(
   date: string // YYYY-MM-DD
 ): Promise<RepositoryResult<DrinkEntryRow[]>> {

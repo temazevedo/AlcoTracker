@@ -34,7 +34,7 @@ export function DrinkPicker({ onSelect, selectedDrink }: DrinkPickerProps) {
 
   useEffect(() => {
     loadDrinks();
-  }, [loadDrinks]); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [loadDrinks]);  
 
   if (loading) {
     return (

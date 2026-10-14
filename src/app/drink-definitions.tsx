@@ -28,7 +28,7 @@ export default function DrinkDefinitionsScreen() {
 
   useEffect(() => {
     loadDefinitions();
-  }, [loadDefinitions]); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [loadDefinitions]);  
 
   const handleToggleArchive = async (def: DrinkDefinitionRow) => {
     const result = def.is_archived ? await unarchiveDefinition(def.id) : await archiveDefinition(def.id);

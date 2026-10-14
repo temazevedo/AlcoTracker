@@ -1,6 +1,5 @@
-import { StyleSheet, View, Text, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, Dimensions , useColorScheme } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
-import { useColorScheme } from 'react-native';
 import { BACPoint, PeakBAC } from '@/bac/types';
 
 interface BACGraphProps {

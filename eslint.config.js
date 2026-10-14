@@ -6,5 +6,11 @@ module.exports = defineConfig([
   expoConfig,
   {
     ignores: ["dist/*"],
-  }
+  },
+  {
+    rules: {
+      // React Native doesn't parse JSX as HTML, so unescaped entities are fine
+      'react/no-unescaped-entities': 'off',
+    },
+  },
 ]);

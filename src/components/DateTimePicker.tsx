@@ -1,7 +1,6 @@
-import { StyleSheet, Text, View, TouchableOpacity, Platform } from "react-native";
-import { useState } from "react";
+import { StyleSheet, Text, View, TouchableOpacity, Platform , useColorScheme } from "react-native";
+import React, { useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useColorScheme } from "react-native";
 
 interface DateTimePickerProps {
   value: Date;
@@ -15,7 +14,7 @@ interface DateTimePickerProps {
 
 type AndroidMode = "date" | "time" | "datetime";
 
-export function DateTimePickerComponent({
+const DateTimePickerComponent: React.FC<DateTimePickerProps> = ({
   value,
   onChange,
   mode = "datetime",
@@ -23,7 +22,7 @@ export function DateTimePickerComponent({
   placeholder,
   minimumDate,
   maximumDate,
-}: DateTimePickerProps) {
+}: DateTimePickerProps) => {
   const [showPicker, setShowPicker] = useState(false);
   const colorScheme = useColorScheme();
 
@@ -77,9 +76,9 @@ export function DateTimePickerComponent({
               value={value}
               mode={androidMode}
               is24Hour={true}
-              onChange={(event: any) => {
-                if (event.nativeEvent?.timestamp !== undefined) {
-                  handleConfirm(new Date(event.nativeEvent.timestamp));
+              onChange={({ nativeEvent }) => {
+                if (nativeEvent?.timestamp !== undefined) {
+                  handleConfirm(new Date(nativeEvent.timestamp));
                 }
               }}
               minimumDate={minimumDate}
@@ -91,7 +90,7 @@ export function DateTimePickerComponent({
       )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -152,3 +151,5 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+export default DateTimePickerComponent;

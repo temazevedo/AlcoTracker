@@ -40,7 +40,7 @@ export function DrinkDefinitionForm({ initialData }: DrinkDefinitionFormProps) {
     if (mode === "edit" && id) {
       loadDefinition();
     }
-  }, [loadDefinition, id, mode]); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [loadDefinition, id, mode]);  
 
   const validate = (): boolean => {
     const newErrors: typeof errors = {};

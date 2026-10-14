@@ -1,9 +1,11 @@
 import { StyleSheet, Text, View, TouchableOpacity, useColorScheme, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useBAC } from "@/hooks/useBAC";
+import { useSession } from "@/hooks/useSession";
 import { getRecentDistinctDrinks } from "@/db/repository";
 import { BACGraph } from "@/components/BACGraph";
 import { QuickAddButtons } from "@/components/QuickAddButtons";
+import { ActiveSessionCard } from "@/components/ActiveSessionCard";
 import { useState, useEffect } from "react";
 
 // Type for recent drinks from getRecentDistinctDrinks
@@ -19,6 +21,7 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const { currentBAC, peakBAC, timeToZeroMinutes, series, loading, error } = useBAC();
+  const { session, loading: sessionLoading, stopSession, extendSession, changeInterval, refresh: refreshSession } = useSession();
   const [quickAddDrinks, setQuickAddDrinks] = useState<RecentDrink[]>([]);
   const [drinksLoading, setDrinksLoading] = useState(true);
 
@@ -61,11 +64,37 @@ export default function HomeScreen() {
   const peakDisplay = peakBAC ? formatBAC(peakBAC.bac) : "—";
   const timeToZeroDisplay = timeToZeroMinutes !== null ? formatTimeToZero(timeToZeroMinutes) : "—";
 
+  const handleStopSession = () => {
+    stopSession();
+  };
+
+  const handleExtendSession = (newEndAt: Date) => {
+    extendSession(newEndAt);
+  };
+
+  const handleChangeInterval = (newIntervalMin: number) => {
+    changeInterval(newIntervalMin);
+  };
+
+  const handleViewLog = () => {
+    router.push("/(tabs)/log" as any);
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: isDark ? "#121212" : "#F5F5F5" }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: isDark ? "#FFFFFF" : "#212121" }]}>AlcoTracker</Text>
       </View>
+
+      {/* Active Session Card */}
+      {session && (
+        <ActiveSessionCard
+          session={session}
+          onStop={handleStopSession}
+          onExtend={handleExtendSession}
+          onChangeInterval={handleChangeInterval}
+        />
+      )}
 
       {/* BAC Card */}
       <View style={[styles.bacCard, { backgroundColor: isDark ? "#1E1E1E" : "#FFFFFF" }]}>
@@ -117,15 +146,25 @@ export default function HomeScreen() {
 
       {/* Actions */}
       <View style={styles.actions}>
-        <TouchableOpacity onPress={() => router.push("/add-drink" as any)} style={styles.primaryAction}>
-          <Text style={styles.primaryActionText}>+ Add Drink</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push("/start-tracking" as any)} style={styles.secondaryAction}>
-          <Text style={styles.secondaryActionText}>Start Tracking</Text>
+        {!session && (
+          <TouchableOpacity onPress={() => router.push("/start-tracking" as any)} style={styles.primaryAction}>
+            <Text style={styles.primaryActionText}>Start Tracking</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity onPress={() => router.push("/add-drink" as any)} style={[styles.secondaryAction, session && styles.primaryAction]}>
+          <Text style={styles.secondaryActionText}>+ Add Drink</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
+}
+
+// Type for recent drinks from getRecentDistinctDrinks
+interface RecentDrink {
+  name: string;
+  volume_ml: number;
+  abv: number;
+  definition_id: number | null;
 }
 
 const styles = StyleSheet.create({
