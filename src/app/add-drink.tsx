@@ -1,10 +1,11 @@
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, Keyboard, Modal } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, Keyboard, Modal, ScrollView } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { createEntry, getActiveSession, calculateGrams, getDefinitionById } from "@/db/repository";
 import { DrinkDefinitionRow } from "@/db/schema";
 import { DrinkPicker } from "@/components/DrinkPicker";
 import DateTimePickerComponent from "@/components/DateTimePicker";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AddDrinkScreen() {
   const router = useRouter();
@@ -83,72 +84,74 @@ export default function AddDrinkScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
-          <Text style={styles.headerButtonText}>Cancel</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add Drink</Text>
-        <TouchableOpacity onPress={handleSave} disabled={loading || !selectedDrink} style={[styles.headerButton, styles.saveButton]}>
-          <Text style={styles.headerButtonText}>{loading ? "Saving..." : "Save"}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.form}>
-        <View style={styles.field}>
-          <Text style={styles.label}>Drink *</Text>
-          <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.drinkButton}>
-            <View style={styles.drinkButtonContent}>
-              {selectedDrink ? (
-                <>
-                  <Text style={styles.drinkButtonName}>{selectedDrink.name}</Text>
-                  <Text style={styles.drinkButtonDetails}>{selectedDrink.volume_ml}ml • {selectedDrink.abv}%</Text>
-                </>
-              ) : (
-                <Text style={styles.drinkButtonPlaceholder}>Select a drink</Text>
-              )}
-            </View>
-            <Text style={styles.drinkButtonArrow}>▼</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Time *</Text>
-          <DateTimePickerComponent
-            value={consumedAt}
-            onChange={setConsumedAt}
-            mode="datetime"
-            label="When did you have this drink?"
-            maximumDate={new Date()}
-          />
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Note (optional)</Text>
-          <TextInput
-            style={styles.textArea}
-            value={note}
-            onChangeText={setNote}
-            placeholder="Add a note..."
-            multiline
-            numberOfLines={3}
-            textAlignVertical="top"
-          />
-        </View>
-
-        {selectedDrink && (
-          <View style={styles.summary}>
-            <Text style={styles.summaryTitle}>Summary</Text>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>{selectedDrink.name}</Text>
-              <Text style={styles.summaryValue}>{selectedDrink.volume_ml}ml • {selectedDrink.abv}%</Text>
-            </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Alcohol</Text>
-              <Text style={styles.summaryValue}>{calculateGrams(selectedDrink.volume_ml, selectedDrink.abv).toFixed(2)}g</Text>
-            </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <View style={styles.form}>
+          <View style={styles.field}>
+            <Text style={styles.label}>Drink *</Text>
+            <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.drinkButton}>
+              <View style={styles.drinkButtonContent}>
+                {selectedDrink ? (
+                  <>
+                    <Text style={styles.drinkButtonName}>{selectedDrink.name}</Text>
+                    <Text style={styles.drinkButtonDetails}>{selectedDrink.volume_ml}ml • {selectedDrink.abv}%</Text>
+                  </>
+                ) : (
+                  <Text style={styles.drinkButtonPlaceholder}>Select a drink</Text>
+                )}
+              </View>
+              <Text style={styles.drinkButtonArrow}>▼</Text>
+            </TouchableOpacity>
           </View>
-        )}
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Time *</Text>
+            <DateTimePickerComponent
+              value={consumedAt}
+              onChange={setConsumedAt}
+              mode="datetime"
+              label="When did you have this drink?"
+              maximumDate={new Date()}
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Note (optional)</Text>
+            <TextInput
+              style={styles.textArea}
+              value={note}
+              onChangeText={setNote}
+              placeholder="Add a note..."
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+          </View>
+
+          {selectedDrink && (
+            <View style={styles.summary}>
+              <Text style={styles.summaryTitle}>Summary</Text>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>{selectedDrink.name}</Text>
+                <Text style={styles.summaryValue}>{selectedDrink.volume_ml}ml • {selectedDrink.abv}%</Text>
+              </View>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Alcohol</Text>
+                <Text style={styles.summaryValue}>{calculateGrams(selectedDrink.volume_ml, selectedDrink.abv).toFixed(2)}g</Text>
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Bottom Action Bar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity onPress={handleCancel} style={styles.bottomButton}>
+          <Text style={styles.cancelButtonText}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleSave} disabled={loading || !selectedDrink} style={[styles.bottomButton, styles.saveBottomButton]}>
+          <Text style={styles.saveButtonText}>{loading ? "Saving..." : "Save"}</Text>
+        </TouchableOpacity>
       </View>
 
       <Modal visible={showPicker} animationType="slide" transparent={false}>
@@ -166,7 +169,7 @@ export default function AddDrinkScreen() {
           />
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -175,34 +178,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F5F5",
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#E0E0E0",
+  scrollView: {
+    flex: 1,
   },
-  headerButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-  },
-  headerButtonText: {
-    fontSize: 16,
-    color: "#208AEF",
-  },
-  saveButton: {
-    marginRight: 0,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#212121",
+  scrollContent: {
+    paddingBottom: 20,
   },
   form: {
     padding: 16,
+    paddingTop: 16,
   },
   field: {
     marginBottom: 20,
@@ -282,6 +266,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: "#2E7D32",
+  },
+  bottomBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "#E0E0E0",
+    paddingBottom: 24,
+  },
+  bottomButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#208AEF",
+  },
+  saveBottomButton: {
+    backgroundColor: "#208AEF",
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
   pickerModal: {
     flex: 1,
