@@ -124,10 +124,10 @@ export function ActiveSessionCard({ session, onStop, onExtend, onChangeInterval 
         <TouchableOpacity onPress={() => setShowExtendModal(true)} style={styles.actionButton}>
           <Text style={styles.actionButtonText}>Extend</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setShowIntervalModal(true)} style={[styles.actionButton, styles.actionButtonSecondary]}>
+        <TouchableOpacity onPress={() => setShowIntervalModal(true)} style={styles.actionButton}>
           <Text style={styles.actionButtonText}>Change Interval</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={onStop} style={[styles.actionButton, styles.actionButtonDestructive]}>
+        <TouchableOpacity onPress={onStop} style={styles.actionButton}>
           <Text style={styles.actionButtonText}>Stop</Text>
         </TouchableOpacity>
       </View>
@@ -276,22 +276,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: '#208AEF',
-  },
-  actionButtonSecondary: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
     borderColor: '#208AEF',
-  },
-  actionButtonDestructive: {
-    backgroundColor: '#FFEBEE',
-    borderWidth: 1,
-    borderColor: '#EF9A9A',
   },
   actionButtonText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#208AEF',
+    textAlign: 'center',
   },
   modalContainer: {
     flex: 1,

@@ -125,14 +125,8 @@ export async function scheduleSessionNotifications(
           sound: 'default',
         },
         trigger: {
-          type: SchedulableTriggerInputTypes.CALENDAR,
-          repeats: false,
-          year: triggerDate.getFullYear(),
-          month: triggerDate.getMonth() + 1,
-          day: triggerDate.getDate(),
-          hour: triggerDate.getHours(),
-          minute: triggerDate.getMinutes(),
-          second: 0,
+          type: SchedulableTriggerInputTypes.DATE,
+          date: triggerDate,
         },
       });
       notificationIds.push(notificationId);
