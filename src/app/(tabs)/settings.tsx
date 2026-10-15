@@ -10,6 +10,14 @@ export default function SettingsScreen() {
     router.push("/drink-definitions" as any);
   };
 
+  const handleExportCSV = () => {
+    router.push("/import-preview?mode=export" as any);
+  };
+
+  const handleImportCSV = () => {
+    router.push("/import-preview?mode=import" as any);
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: isDark ? "#121212" : "#F5F5F5" }]}>
       <View style={styles.header}>
@@ -54,10 +62,10 @@ export default function SettingsScreen() {
 
       <View style={[styles.section, { backgroundColor: isDark ? "#1E1E1E" : "#FFFFFF" }]}>
         <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#212121" }]}>Data</Text>
-        <TouchableOpacity style={styles.settingsRow} onPress={() => {}}>
+        <TouchableOpacity style={styles.settingsRow} onPress={handleExportCSV}>
           <Text style={[styles.settingsLabel, { color: isDark ? "#FFFFFF" : "#212121" }]}>Export CSV</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.settingsRow} onPress={() => {}}>
+        <TouchableOpacity style={styles.settingsRow} onPress={handleImportCSV}>
           <Text style={[styles.settingsLabel, { color: isDark ? "#FFFFFF" : "#212121" }]}>Import CSV</Text>
         </TouchableOpacity>
       </View>

@@ -213,7 +213,7 @@ export async function toggleFavorite(id: number): Promise<RepositoryResult<Drink
 // Drink Entries
 // ============================================================================
 
-interface CreateEntryInput {
+export interface CreateEntryInput {
   definition_id: number | null;
   name_snapshot: string;
   volume_ml: number;
@@ -222,6 +222,14 @@ interface CreateEntryInput {
   consumed_at: string; // ISO8601 UTC
   session_id: number | null;
   note: string | null;
+}
+
+export interface CreateDefinitionInput {
+  name: string;
+  volume_ml: number;
+  abv: number;
+  is_favorite: boolean;
+  is_archived: boolean;
 }
 
 export async function createEntry(input: CreateEntryInput): Promise<RepositoryResult<DrinkEntryRow>> {
@@ -340,6 +348,120 @@ export async function getEntriesForStats(
     return { success: true, data };
   } catch (error) {
     return { success: false, error: `Failed to get entries for stats: ${error}` };
+  }
+}
+
+/**
+ * Get all entries (for export)
+ */
+export async function getAllEntries(): Promise<RepositoryResult<DrinkEntryRow[]>> {
+  try {
+    const db = await getDatabase();
+    const data = await db.getAllAsync<DrinkEntryRow>(
+      `SELECT * FROM ${TABLE_NAMES.DRINK_ENTRIES}
+       ORDER BY consumed_at ASC`
+    );
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: `Failed to get all entries: ${error}` };
+  }
+}
+
+/**
+ * Get all definitions including archived (for export)
+ */
+export async function getAllDefinitionsForExport(): Promise<RepositoryResult<DrinkDefinitionRow[]>> {
+  try {
+    const db = await getDatabase();
+    const data = await db.getAllAsync<DrinkDefinitionRow>(
+      `SELECT * FROM ${TABLE_NAMES.DRINK_DEFINITIONS}
+       ORDER BY created_at ASC`
+    );
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: `Failed to get all definitions for export: ${error}` };
+  }
+}
+
+/**
+ * Bulk create entries (for import)
+ */
+export async function bulkCreateEntries(entries: CreateEntryInput[]): Promise<RepositoryResult<number>> {
+  if (entries.length === 0) return { success: true, data: 0 };
+  
+  try {
+    const db = await getDatabase();
+    const createdAt = new Date().toISOString();
+    
+    // Use transaction for atomic bulk insert
+    await db.withTransactionAsync(async () => {
+      const stmt = await db.prepareAsync(
+        `INSERT INTO ${TABLE_NAMES.DRINK_ENTRIES}
+         (definition_id, name_snapshot, volume_ml, abv, grams, consumed_at, session_id, note, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      );
+      
+      try {
+        for (const entry of entries) {
+          await stmt.executeAsync([
+            entry.definition_id,
+            entry.name_snapshot,
+            entry.volume_ml,
+            entry.abv,
+            entry.grams,
+            entry.consumed_at,
+            entry.session_id,
+            entry.note,
+            createdAt,
+          ]);
+        }
+      } finally {
+        await stmt.finalizeAsync();
+      }
+    });
+    
+    return { success: true, data: entries.length };
+  } catch (error) {
+    return { success: false, error: `Failed to bulk create entries: ${error}` };
+  }
+}
+
+/**
+ * Bulk create definitions (for import)
+ */
+export async function bulkCreateDefinitions(definitions: CreateDefinitionInput[]): Promise<RepositoryResult<number>> {
+  if (definitions.length === 0) return { success: true, data: 0 };
+  
+  try {
+    const db = await getDatabase();
+    const createdAt = new Date().toISOString();
+    
+    await db.withTransactionAsync(async () => {
+      const stmt = await db.prepareAsync(
+        `INSERT INTO ${TABLE_NAMES.DRINK_DEFINITIONS}
+         (name, volume_ml, abv, is_favorite, is_archived, created_at)
+         VALUES (?, ?, ?, ?, ?, ?)`
+      );
+      
+      try {
+        for (const def of definitions) {
+          await stmt.executeAsync([
+            def.name,
+            def.volume_ml,
+            def.abv,
+            def.is_favorite ? 1 : 0,
+            def.is_archived ? 1 : 0,
+            createdAt,
+          ]);
+        }
+      } finally {
+        await stmt.finalizeAsync();
+      }
+    });
+    
+    return { success: true, data: definitions.length };
+  } catch (error) {
+    return { success: false, error: `Failed to bulk create definitions: ${error}` };
   }
 }
 
