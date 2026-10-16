@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, RefreshControl } from "react-native";
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, RefreshControl, Modal } from "react-native";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { getAllDefinitions, getActiveDefinitions, archiveDefinition, unarchiveDefinition, toggleFavorite } from "@/db/repository";
@@ -75,19 +75,7 @@ export default function DrinkDefinitionsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.title}>Drink Definitions</Text>
-        </View>
-        <View style={styles.headerRight}>
-          <TouchableOpacity onPress={() => setShowArchived(!showArchived)} style={styles.toggleButton}>
-            <Text style={[styles.toggleText, showArchived && styles.toggleActive]}>
-              {showArchived ? "Hide Archived" : "Show Archived"}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleAddNew} style={styles.addButton}>
-            <Text style={styles.addButtonText}>+ Add</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.title}>Drink Definitions</Text>
       </View>
 
       <FlatList
@@ -117,10 +105,22 @@ export default function DrinkDefinitionsScreen() {
         contentContainerStyle={styles.listContent}
       />
 
+      {/* Bottom Action Bar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity onPress={() => setShowArchived(!showArchived)} style={[styles.bottomButton, styles.secondaryAction]}>
+          <Text style={styles.secondaryActionText}>{showArchived ? "Hide Archived" : "Show Archived"}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleAddNew} style={[styles.bottomButton, styles.primaryAction]}>
+          <Text style={styles.primaryActionText}>+ Add</Text>
+        </TouchableOpacity>
+      </View>
+
       {showForm && (
-        <DrinkDefinitionForm
-          initialData={editingId ? definitions.find(d => d.id === editingId) : undefined}
-        />
+        <Modal visible={showForm} transparent={false} animationType="slide" onRequestClose={handleFormClose}>
+          <DrinkDefinitionForm
+            initialData={editingId ? definitions.find(d => d.id === editingId) : undefined}
+          />
+        </Modal>
       )}
     </View>
   );
@@ -132,50 +132,49 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5",
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#E0E0E0",
   },
-  headerLeft: {
-    flex: 1,
-  },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
   title: {
     fontSize: 20,
     fontWeight: "600",
     color: "#212121",
   },
-  toggleButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: "#F5F5F5",
-  },
-  toggleText: {
-    fontSize: 13,
-    color: "#757575",
-  },
-  toggleActive: {
-    backgroundColor: "#208AEF",
-    color: "#FFFFFF",
-  },
-  addButton: {
+  bottomBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingVertical: 12,
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "#E0E0E0",
+    paddingBottom: 24,
+  },
+  bottomButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  secondaryAction: {
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderColor: "#208AEF",
+  },
+  secondaryActionText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#208AEF",
+  },
+  primaryAction: {
     backgroundColor: "#208AEF",
   },
-  addButtonText: {
-    fontSize: 14,
+  primaryActionText: {
+    fontSize: 16,
     fontWeight: "600",
     color: "#FFFFFF",
   },

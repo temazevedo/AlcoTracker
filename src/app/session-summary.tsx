@@ -34,10 +34,12 @@ export default function SessionSummaryScreen() {
 
   const handleViewLog = () => {
     // Navigate to log tab
+    router.push('/(tabs)/log' as any);
   };
 
   const handleDone = () => {
-    // Navigate back to home
+    // Pop back to the main screen
+    router.dismissAll();
   };
 
   if (loading) {
@@ -59,8 +61,8 @@ export default function SessionSummaryScreen() {
   return (
     <SessionSummaryCard
       session={session}
-      onViewLog={() => {}}
-      onDone={() => {}}
+      onViewLog={handleViewLog}
+      onDone={handleDone}
     />
   );
 }

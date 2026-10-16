@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, useColorScheme, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, useColorScheme, ActivityIndicator, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useBAC } from "@/hooks/useBAC";
 import { useSession } from "@/hooks/useSession";
@@ -81,7 +81,11 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? "#121212" : "#F5F5F5" }]}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[styles.content, { backgroundColor: isDark ? "#121212" : "#F5F5F5" }]}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.header}>
         <Text style={[styles.title, { color: isDark ? "#FFFFFF" : "#212121" }]}>AlcoTracker</Text>
       </View>
@@ -151,11 +155,11 @@ export default function HomeScreen() {
             <Text style={styles.primaryActionText}>Start Tracking</Text>
           </TouchableOpacity>
         )}
-        <TouchableOpacity onPress={() => router.push("/add-drink" as any)} style={[styles.secondaryAction, session && styles.primaryAction]}>
+        <TouchableOpacity onPress={() => router.push("/add-drink" as any)} style={styles.secondaryAction}>
           <Text style={styles.secondaryActionText}>+ Add Drink</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -170,6 +174,8 @@ interface RecentDrink {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 32,

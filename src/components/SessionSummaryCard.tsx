@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, ActivityIndicator, ScrollView , useColorScheme } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, ScrollView , useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SessionRow , DrinkEntryRow } from '@/db/schema';
 import { getEntriesBySession, getProfile } from '@/db/repository';
@@ -168,33 +168,32 @@ export function SessionSummaryCard({ session, onViewLog, onDone }: SessionSummar
             <Text style={[styles.cardSubtitle, { color: isDark ? '#BDBDBD' : '#757575' }]}>{entries.length} entries</Text>
           </View>
 
-          <FlatList
-            data={entries}
-            keyExtractor={(item) => String(item.id)}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={styles.entryItem}>
-                <View style={styles.entryContent}>
-                  <View style={styles.entryMain}>
-                    <Text style={[styles.entryName, { color: isDark ? '#FFFFFF' : '#212121' }]}>{item.name_snapshot}</Text>
-                    <Text style={[styles.entryTime, { color: isDark ? '#9E9E9E' : '#757575' }]}>{formatTime(item.consumed_at)}</Text>
+          {entries.length === 0 ? (
+            <View style={styles.emptyEntries}>
+              <Text style={[styles.emptyEntriesText, { color: isDark ? '#9E9E9E' : '#757575' }]}>No drinks logged in this session</Text>
+            </View>
+          ) : (
+            entries.map((item, index) => (
+              <View key={String(item.id)}>
+                <View style={styles.entryItem}>
+                  <View style={styles.entryContent}>
+                    <View style={styles.entryMain}>
+                      <Text style={[styles.entryName, { color: isDark ? '#FFFFFF' : '#212121' }]}>{item.name_snapshot}</Text>
+                      <Text style={[styles.entryTime, { color: isDark ? '#9E9E9E' : '#757575' }]}>{formatTime(item.consumed_at)}</Text>
+                    </View>
+                    <View style={styles.entryDetails}>
+                      <Text style={[styles.entryVolume, { color: isDark ? '#BDBDBD' : '#757575' }]}>{item.volume_ml}ml • {item.abv}%</Text>
+                      <Text style={[styles.entryGrams, { color: '#4CAF50' }]}>{item.grams.toFixed(2)}g</Text>
+                    </View>
                   </View>
-                  <View style={styles.entryDetails}>
-                    <Text style={[styles.entryVolume, { color: isDark ? '#BDBDBD' : '#757575' }]}>{item.volume_ml}ml • {item.abv}%</Text>
-                    <Text style={[styles.entryGrams, { color: '#4CAF50' }]}>{item.grams.toFixed(2)}g</Text>
-                  </View>
+                  {item.note && (
+                    <Text style={[styles.entryNote, { color: isDark ? '#BDBDBD' : '#9E9E9E' }]}>{item.note}</Text>
+                  )}
                 </View>
-                {item.note && (
-                  <Text style={[styles.entryNote, { color: isDark ? '#BDBDBD' : '#9E9E9E' }]}>{item.note}</Text>
-                )}
-              </TouchableOpacity>
-            )}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            ListEmptyComponent={
-              <View style={styles.emptyEntries}>
-                <Text style={[styles.emptyEntriesText, { color: isDark ? '#9E9E9E' : '#757575' }]}>No drinks logged in this session</Text>
+                {index < entries.length - 1 && <View style={styles.separator} />}
               </View>
-            }
-          />
+            ))
+          )}
         </View>
 
         {/* Actions */}

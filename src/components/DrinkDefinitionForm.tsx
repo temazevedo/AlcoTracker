@@ -1,9 +1,11 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { StyleSheet, Text, View, TextInput, Switch, TouchableOpacity, Alert, Keyboard } from "react-native";
+import { StyleSheet, Text, View, TextInput, Switch, TouchableOpacity, Alert, Keyboard, ScrollView } from "react-native";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { createDefinition, updateDefinition, getDefinitionById } from "@/db/repository";
 import { DrinkDefinitionRow } from "@/db/schema";
+import { parseDecimal } from "@/utils/parseDecimal";
 
 type Mode = "create" | "edit";
 
@@ -45,10 +47,10 @@ export function DrinkDefinitionForm({ initialData }: DrinkDefinitionFormProps) {
   const validate = (): boolean => {
     const newErrors: typeof errors = {};
     if (!name.trim()) newErrors.name = "Name is required";
-    const vol = parseInt(volume_ml, 10);
-    if (!volume_ml || isNaN(vol) || vol <= 0) newErrors.volume_ml = "Volume must be a positive number";
-    const abvVal = parseFloat(abv);
-    if (!abv || isNaN(abvVal) || abvVal < 0 || abvVal > 100) newErrors.abv = "ABV must be between 0 and 100";
+    const vol = parseDecimal(volume_ml);
+    if (volume_ml.trim() === "" || isNaN(vol) || vol <= 0) newErrors.volume_ml = "Volume must be a positive number";
+    const abvVal = parseDecimal(abv);
+    if (abv.trim() === "" || isNaN(abvVal) || abvVal < 0 || abvVal > 100) newErrors.abv = "ABV must be between 0 and 100";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -58,8 +60,8 @@ export function DrinkDefinitionForm({ initialData }: DrinkDefinitionFormProps) {
     Keyboard.dismiss();
     setLoading(true);
 
-    const vol = parseInt(volume_ml, 10);
-    const abvVal = parseFloat(abv);
+    const vol = parseDecimal(volume_ml);
+    const abvVal = parseDecimal(abv);
 
     try {
       if (mode === "create") {
@@ -89,18 +91,12 @@ export function DrinkDefinitionForm({ initialData }: DrinkDefinitionFormProps) {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
-          <Text style={styles.headerButtonText}>Cancel</Text>
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>{mode === "create" ? "New Definition" : "Edit Definition"}</Text>
-        <TouchableOpacity onPress={handleSave} disabled={loading} style={[styles.headerButton, styles.saveButton]}>
-          <Text style={styles.headerButtonText}>{loading ? "Saving..." : "Save"}</Text>
-        </TouchableOpacity>
       </View>
 
-      <View style={styles.form}>
+      <ScrollView style={styles.formScroll} contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
         <View style={styles.field}>
           <Text style={styles.label}>Name *</Text>
           <TextInput
@@ -149,8 +145,18 @@ export function DrinkDefinitionForm({ initialData }: DrinkDefinitionFormProps) {
             />
           </View>
         </View>
+      </ScrollView>
+
+      {/* Bottom Action Bar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity onPress={handleCancel} style={[styles.bottomButton, styles.secondaryAction]}>
+          <Text style={styles.secondaryActionText}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleSave} disabled={loading} style={[styles.bottomButton, styles.primaryAction]}>
+          <Text style={styles.primaryActionText}>{loading ? "Saving..." : "Save"}</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -160,30 +166,50 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5",
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#E0E0E0",
   },
-  headerButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-  },
-  headerButtonText: {
-    fontSize: 16,
-    color: "#208AEF",
-  },
-  saveButton: {
-    marginRight: 0,
-  },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "#212121",
+  },
+  bottomBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  bottomButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  secondaryAction: {
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderColor: "#208AEF",
+  },
+  secondaryActionText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#208AEF",
+  },
+  primaryAction: {
+    backgroundColor: "#208AEF",
+  },
+  primaryActionText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  formScroll: {
+    flex: 1,
   },
   form: {
     padding: 16,
