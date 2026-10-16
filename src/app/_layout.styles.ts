@@ -69,4 +69,14 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
+  disclaimerCloseButton: {
+    marginTop: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  disclaimerCloseButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#208AEF',
+  },
 });

@@ -1,10 +1,33 @@
 import { StyleSheet, Text, View, TouchableOpacity, Switch, useColorScheme } from "react-native";
-import { useRouter } from "expo-router";
+import { useState, useCallback } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
+import { getProfile } from "@/db/repository";
+import { ProfileSettingsRow } from "@/db/schema";
+import { useDisclaimer } from "@/components/DisclaimerModal";
 
 export default function SettingsScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const { showDisclaimer } = useDisclaimer();
+  const [profile, setProfile] = useState<ProfileSettingsRow | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      let mounted = true;
+      (async () => {
+        const result = await getProfile();
+        if (mounted && result.success && result.data) {
+          setProfile(result.data);
+        }
+      })();
+      return () => { mounted = false; };
+    }, [])
+  );
+
+  const handleEditProfile = () => {
+    router.push("/profile-settings" as any);
+  };
 
   const handleDrinkDefinitions = () => {
     router.push("/drink-definitions" as any);
@@ -26,17 +49,21 @@ export default function SettingsScreen() {
 
       <View style={[styles.section, { backgroundColor: isDark ? "#1E1E1E" : "#FFFFFF" }]}>
         <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#212121" }]}>Profile</Text>
-        <TouchableOpacity style={styles.settingsRow} onPress={() => {}}>
+        <TouchableOpacity style={styles.settingsRow} onPress={handleEditProfile}>
           <Text style={[styles.settingsLabel, { color: isDark ? "#FFFFFF" : "#212121" }]}>Weight & Sex</Text>
-          <Text style={[styles.settingsValue, { color: isDark ? "#BDBDBD" : "#757575" }]}>Not set</Text>
+          <Text style={[styles.settingsValue, { color: isDark ? "#BDBDBD" : "#757575" }]}>
+            {profile ? `${profile.weight_kg} kg • ${profile.sex === "male" ? "Male" : "Female"}` : "Tap to set"}
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.settingsRow} onPress={() => {}}>
+        <TouchableOpacity style={styles.settingsRow} onPress={handleEditProfile}>
           <Text style={[styles.settingsLabel, { color: isDark ? "#FFFFFF" : "#212121" }]}>Units</Text>
           <Text style={[styles.settingsValue, { color: isDark ? "#BDBDBD" : "#757575" }]}>Metric (‰)</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.settingsRow} onPress={() => {}}>
+        <TouchableOpacity style={styles.settingsRow} onPress={handleEditProfile}>
           <Text style={[styles.settingsLabel, { color: isDark ? "#FFFFFF" : "#212121" }]}>Elimination Rate</Text>
-          <Text style={[styles.settingsValue, { color: isDark ? "#BDBDBD" : "#757575" }]}>0.15 ‰/h</Text>
+          <Text style={[styles.settingsValue, { color: isDark ? "#BDBDBD" : "#757575" }]}>
+            {profile ? `${profile.elimination_rate.toFixed(2)} ‰/h` : "—"}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -72,7 +99,7 @@ export default function SettingsScreen() {
 
       <View style={[styles.section, { backgroundColor: isDark ? "#1E1E1E" : "#FFFFFF" }]}>
         <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#212121" }]}>About</Text>
-        <TouchableOpacity style={styles.settingsRow} onPress={() => {}}>
+        <TouchableOpacity style={styles.settingsRow} onPress={showDisclaimer}>
           <Text style={[styles.settingsLabel, { color: isDark ? "#FFFFFF" : "#212121" }]}>Disclaimer</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.settingsRow} onPress={() => {}}>
